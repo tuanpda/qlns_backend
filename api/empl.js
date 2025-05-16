@@ -16,7 +16,9 @@ const csv = require("csv-parser");
 
 // LOCAL
 var folderFileUpload =
-  "/Users/apple/Documents/code/p_Quanlynhansu/qlns_client/static/anhHoSo/";
+  "D:\\SOFTWARE\\QLNSSOFTWARE\\qlns_client\\static\\anhHoSo";
+// var folderFileUpload =
+//   "/Users/apple/Documents/code/p_Quanlynhansu/qlns_client/static/anhHoSo/";
 var urlServer = "localhost:2612";
 
 // SET STORAGE
@@ -43,7 +45,7 @@ router.get("/all-emp", async (req, res) => {
     await pool.connect();
     const result = await pool
       .request()
-      .query(`SELECT * FROM nhansu where isThoivu <> 1 order by maPhongBan`);
+      .query(`SELECT * FROM nhansu where isThoivu <> 1 and isNghiHuu=0  order by maPhongBan`);
     const ns = result.recordset;
     res.json(ns);
   } catch (error) {
@@ -55,7 +57,7 @@ router.get("/all-emp", async (req, res) => {
 router.get("/all-emp-tinhtuoinghihuu", async (req, res) => {
   try {
     await pool.connect();
-    const result = await pool.request().query(`SELECT * FROM nhansu`);
+    const result = await pool.request().query(`SELECT * FROM nhansu where isNghiHuu=0`);
     const ns = result.recordset;
     res.json(ns);
   } catch (error) {
@@ -82,7 +84,7 @@ router.get("/all-emp-thoivu", async (req, res) => {
     await pool.connect();
     const result = await pool
       .request()
-      .query(`SELECT * FROM nhansu where isthoivu=1`);
+      .query(`SELECT * FROM nhansu where isthoivu=1 and isNghiHuu=0`);
     const nstv = result.recordset;
     res.json(nstv);
   } catch (error) {
@@ -93,7 +95,7 @@ router.get("/all-emp-thoivu", async (req, res) => {
 router.get("/all-emp-nghihuu", async (req, res) => {
   try {
     await pool.connect();
-    const result = await pool.request().query(`SELECT * FROM dsnghihuu`);
+    const result = await pool.request().query(`SELECT * FROM nhansu where isNghiHuu = 1`);
     const nghihuu = result.recordset;
     res.json(nghihuu);
   } catch (error) {
@@ -117,7 +119,7 @@ router.get("/all-emp-dangvien", async (req, res) => {
     await pool.connect();
     const result = await pool
       .request()
-      .query(`SELECT * FROM dangvien order by _id`);
+      .query(`SELECT * FROM nhansu where isDangVien=1 and isNghiHuu=0 order by _id`);
     const nghihuu = result.recordset;
     res.json(nghihuu);
   } catch (error) {
@@ -209,6 +211,8 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
         .input("phongBan", dataNhansu.phongBan)
         .input("chiNhanh", dataNhansu.chiNhanh)
         .input("isThoiVu", dataNhansu.isThoiVu)
+        .input("isNangNhocDocHai", dataNhansu.isNangNhocDocHai)
+        .input("ngayHopDongTinhPhep", dataNhansu.ngayHopDongTinhPhep)
         .input("anhHoSo", linkAnhHoSo).query(`
           INSERT INTO nhansu (
             hoTen, soDienThoai, ngaySinh, gioiTinh, viTriCongTac, 
@@ -216,16 +220,16 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
             trinhDoHocVan, trinhDoChuyenMon, danToc, tonGiao, soCmnd, 
             ngayCap_cmnd, noiCap_cmnd, soCccd, ngayCap_Cccd, noiCap_Cccd, 
             noiKhaiSinh, diaChiHoKhau, diaChiHienNay, createdBy, createdAt, 
-            ghichu, maNhanVien, status, ischinhanh, isphongban, 
-            maPhongBan, maChiNhanh, phongBan, chiNhanh, isThoiVu, anhHoSo
+            ghichu, maNhanVien, status, ischinhanh, isphongban, isThoiVu, isNangNhocDocHai, ngayHopDongTinhPhep,
+            maPhongBan, maChiNhanh, phongBan, chiNhanh, anhHoSo
           ) VALUES (
             @hoTen, @soDienThoai, @ngaySinh, @gioiTinh, @viTriCongTac, 
             @thoiGianBatdauTgBhxh, @loaiHd, @thoiHanHd_Batdau, @thoiHanHd_Ketthuc, @ngayBonhiemChucvu, 
             @trinhDoHocVan, @trinhDoChuyenMon, @danToc, @tonGiao, @soCmnd, 
             @ngayCap_cmnd, @noiCap_cmnd, @soCccd, @ngayCap_Cccd, @noiCap_Cccd, 
             @noiKhaiSinh, @diaChiHoKhau, @diaChiHienNay, @createdBy, @createdAt, 
-            @ghichu, @maNhanVien, @status, @ischinhanh, @isphongban, 
-            @maPhongBan, @maChiNhanh, @phongBan, @chiNhanh, @isThoiVu, @anhHoSo
+            @ghichu, @maNhanVien, @status, @ischinhanh, @isphongban, @isThoiVu, @isNangNhocDocHai, @ngayHopDongTinhPhep,
+            @maPhongBan, @maChiNhanh, @phongBan, @chiNhanh, @anhHoSo
           );
         `);
 
@@ -585,6 +589,71 @@ router.post("/read-log-his-system", async (req, res) => {
     });
   } finally {
     if (pool.connected) await pool.close();
+  }
+});
+
+// report
+router.get("/report-index", async (req, res) => {
+  try {
+    await pool.connect();
+    const result = await pool
+      .request()
+      .query(`SELECT 
+            COUNT(*) AS tongNhanSu,
+            COUNT(CASE WHEN isDangVien = 1 THEN 1 END) AS tongDangVien,
+            COUNT(CASE WHEN gioiTinh = 1 THEN 1 END) AS tongNam,
+            COUNT(CASE WHEN gioiTinh = 0 THEN 1 END) AS tongNu,
+            COUNT(CASE WHEN isTrenDaiHoc = 1 THEN 1 END) AS tongTrenDaiHoc,
+            COUNT(CASE WHEN isDaiHoc = 1 THEN 1 END) AS tongDaiHoc,
+            COUNT(CASE WHEN isCaoDang = 1 THEN 1 END) AS tongCaoDang,
+            COUNT(CASE WHEN isTrungCap = 1 THEN 1 END) AS tongTrungCap,
+            COUNT(CASE WHEN isSocap = 1 THEN 1 END) AS tongSoCap,
+            COUNT(CASE WHEN isLaoDongPhoThong = 1 THEN 1 END) AS tongLDPT
+        FROM nhansu
+        WHERE isNghiHuu = 0`);
+    const ns = result.recordset[0];
+    // console.log(ns);
+    
+    res.json(ns);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+router.get("/report-chart-age", async (req, res) => {
+  try {
+    await pool.connect();
+    const result = await pool
+      .request()
+      .query(`SELECT
+            CASE
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) < 25 THEN '<25'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 25 AND 30 THEN '25-30'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 31 AND 35 THEN '31-35'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 36 AND 40 THEN '36-40'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 41 AND 45 THEN '41-45'
+              ELSE '>45'
+            END AS nhomTuoi,
+            COUNT(*) AS soLuong
+          FROM nhansu
+          WHERE isNghiHuu = 0
+          GROUP BY
+            CASE
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) < 25 THEN '<25'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 25 AND 30 THEN '25-30'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 31 AND 35 THEN '31-35'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 36 AND 40 THEN '36-40'
+              WHEN (YEAR(GETDATE()) - CAST(RIGHT(ngaySinh, 4) AS INT)) BETWEEN 41 AND 45 THEN '41-45'
+              ELSE '>45'
+            END
+          ORDER BY nhomTuoi
+          `);
+    const ns = result.recordset;
+    // console.log(ns);
+    
+    res.json(ns);
+  } catch (error) {
+    res.status(500).json(error);
   }
 });
 

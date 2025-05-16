@@ -277,27 +277,34 @@ router.post("/user/changeemail", async (req, res) => {
 });
 
 /* Lấy 1 user auth */
+// router.get("/auth/user", verifyToken, async (req, res) => {
+//   // console.log(req.decoded)
+//   // console.log(req.decoded._id)
+//   const _id = req.decoded._id;
+//   try {
+//     await pool.connect();
+//     const result = await pool
+//       .request()
+//       .query(`SELECT * FROM users WHERE _id = ${_id}`);
+//     const user = result.recordset[0];
+//     if (!user) {
+//       res.status(403).json({
+//         success: false,
+//         message: "Authenticate failed, not found user",
+//       });
+//     } else {
+//       res.json(user);
+//     }
+//   } catch (error) {
+//     res.status(500).json(error);
+//   }
+// });
+
 router.get("/auth/user", verifyToken, async (req, res) => {
-  // console.log(req.decoded)
-  // console.log(req.decoded._id)
-  const _id = req.decoded._id;
-  try {
-    await pool.connect();
-    const result = await pool
-      .request()
-      .query(`SELECT * FROM users WHERE _id = ${_id}`);
-    const user = result.recordset[0];
-    if (!user) {
-      res.status(403).json({
-        success: false,
-        message: "Authenticate failed, not found user",
-      });
-    } else {
-      res.json(user);
-    }
-  } catch (error) {
-    res.status(500).json(error);
-  }
+  // console.log(req.user);
+  res.json({
+    user: req.user,
+  });
 });
 
 /* Login user auth */

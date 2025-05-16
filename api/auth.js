@@ -45,6 +45,46 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 /* Login user auth */
+// router.post("/access/login", async (req, res, next) => {
+//   const username = req.body.username;
+//   const password = req.body.password;
+//   try {
+//     await pool.connect();
+//     const result = await pool
+//       .request()
+//       .input("username", username)
+//       .query(`SELECT * FROM users WHERE username = @username`);
+//     const user = result.recordset[0];
+//     if (!user) {
+//       res.status(403).json({
+//         success: 9,
+//         message: "Authenticate failed, not found user",
+//       });
+//     } else {
+//       const match = await bcrypt.compare(password, user.password);
+//       if (match) {
+//         if (user.active !== true) {
+//           res.status(403).json({
+//             success: 4,
+//             message: "Authenticate failed, not active user",
+//           });
+//         } else {
+//           let token = jwt.sign(user, process.env.SECRET, { expiresIn: "12h" });
+//           res.json({ success: 8, user, token });
+//           //console.log(user);
+//         }
+//       } else {
+//         res.status(403).json({
+//           success: 7,
+//           message: "Authenticate failed, wrong password",
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     res.status(500).json(error);
+//   }
+// });
+
 router.post("/access/login", async (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -70,8 +110,21 @@ router.post("/access/login", async (req, res, next) => {
           });
         } else {
           let token = jwt.sign(user, process.env.SECRET, { expiresIn: "12h" });
-          res.json({ success: 8, user, token });
+          // res.json({ success: 8, user, token });
           //console.log(user);
+          res.cookie("token", token, {
+            httpOnly: true,
+            secure: false, // nếu dùng HTTPS thì phải là true
+            sameSite: "lax",
+            maxAge: 12 * 60 * 60 * 1000, // 12 tiếng
+          });
+
+          res.json({
+            success: 8,
+            message: "Login successful",
+            user,
+            token,
+          });
         }
       } else {
         res.status(403).json({
