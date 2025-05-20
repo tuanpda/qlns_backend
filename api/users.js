@@ -302,7 +302,7 @@ router.post("/user/changeemail", async (req, res) => {
 // });
 
 router.get("/auth/user", verifyToken, async (req, res) => {
-  // console.log(req.user);
+  console.log(req.user);
   res.json({
     user: req.user,
   });
