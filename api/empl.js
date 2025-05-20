@@ -7,6 +7,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
+const { log } = require("console");
 
 // MÁY CHỦ
 // var folderFileUpload = "D:\\code\\tcdvthu_server\\public\\fileimport";
@@ -16,10 +17,11 @@ const csv = require("csv-parser");
 
 // LOCAL
 var folderFileUpload =
-  "D:\\SOFTWARE\\QLNSSOFTWARE\\qlns_client\\static\\anhHoSo";
+  "E:\\CODE_APP\\QUANLYNHANSU\\MTDTHATINH\\qlns_client\\static\\anhHoSo";
 // var folderFileUpload =
 //   "/Users/apple/Documents/code/p_Quanlynhansu/qlns_client/static/anhHoSo/";
-var urlServer = "localhost:2612";
+// var urlServer = "localhost:2612";
+var urlServer = "14.224.129.177:2612";
 
 // SET STORAGE
 var storage = multer.diskStorage({
@@ -46,6 +48,23 @@ router.get("/all-emp", async (req, res) => {
     const result = await pool
       .request()
       .query(`SELECT * FROM nhansu where isThoivu <> 1 and isNghiHuu=0  order by maPhongBan`);
+    const ns = result.recordset;
+    res.json(ns);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+// nghỉ phép
+router.get("/nghiphep-theo-nam", async (req, res) => {
+  // console.log(req.query.nam);
+  const nam = req.query.nam; 
+  try {
+    await pool.connect();
+    const result = await pool
+      .request()
+      .input("nam", nam)
+      .query(`SELECT * FROM quanlynghiphep where nam=@nam`);
     const ns = result.recordset;
     res.json(ns);
   } catch (error) {
@@ -249,6 +268,104 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
       success: false,
       message: "Lỗi kết nối cơ sở dữ liệu",
       error: error.message,
+    });
+  } finally {
+    if (pool.connected) await pool.close();
+  }
+});
+
+router.post("/add-ngaynghiphep", async (req, res) => { 
+  const dataNhansu = req.body;
+  // console.log(dataNhansu);
+  
+  let transaction = null;
+
+  try {
+    await pool.connect();
+    transaction = new Transaction(pool);
+    await transaction.begin();
+
+    await transaction
+      .request()
+      .input("maNhanVien", dataNhansu.maNhanVien)
+      .input("hoTen", dataNhansu.hoTen)
+      .input("isphongban", dataNhansu.isphongban)
+      .input("ischinhanh", dataNhansu.ischinhanh)
+      .input("maPhongBan", dataNhansu.maPhongBan)
+      .input("phongBan", dataNhansu.phongBan)
+      .input("maChiNhanh", dataNhansu.maChiNhanh)
+      .input("chiNhanh", dataNhansu.chiNhanh)
+      .input("ngayHopDongTinhPhep", dataNhansu.ngayHopDongTinhPhep)
+      .input("isNangNhocDocHai", dataNhansu.isNangNhocDocHai)
+      .input("ngayPhep", dataNhansu.ngayPhep)
+      .input("tongDaNghi", dataNhansu.tongDaNghi)
+      .input("conLai", dataNhansu.conLai)
+      .input("thang1", dataNhansu.thang?.["1"] || 0)
+      .input("thang2", dataNhansu.thang?.["2"] || 0)
+      .input("thang3", dataNhansu.thang?.["3"] || 0)
+      .input("thang4", dataNhansu.thang?.["4"] || 0)
+      .input("thang5", dataNhansu.thang?.["5"] || 0)
+      .input("thang6", dataNhansu.thang?.["6"] || 0)
+      .input("thang7", dataNhansu.thang?.["7"] || 0)
+      .input("thang8", dataNhansu.thang?.["8"] || 0)
+      .input("thang9", dataNhansu.thang?.["9"] || 0)
+      .input("thang10", dataNhansu.thang?.["10"] || 0)
+      .input("thang11", dataNhansu.thang?.["11"] || 0)
+      .input("thang12", dataNhansu.thang?.["12"] || 0)
+      .input("createdBy", dataNhansu.createdBy)
+      .input("createdAt", dataNhansu.createdAt)
+      .input("ghichu", dataNhansu.ghichu)
+      .input("nam", dataNhansu.namNghiPhep)
+      .query(`
+        MERGE quanlynghiphep AS target
+        USING (SELECT 
+          @maNhanVien AS maNhanVien,
+          @nam AS nam
+        ) AS source
+        ON target.maNhanVien = source.maNhanVien AND target.nam = source.nam
+        WHEN MATCHED THEN 
+          UPDATE SET 
+            hoTen = @hoTen,
+            isphongban = @isphongban,
+            ischinhanh = @ischinhanh,
+            maPhongBan = @maPhongBan,
+            phongBan = @phongBan,
+            maChiNhanh = @maChiNhanh,
+            chiNhanh = @chiNhanh,
+            ngayHopDongTinhPhep = @ngayHopDongTinhPhep,
+            isNangNhocDocHai = @isNangNhocDocHai,
+            ngayPhep = @ngayPhep,
+            tongDaNghi = @tongDaNghi,
+            conLai = @conlai,
+            thang1 = @thang1, thang2 = @thang2, thang3 = @thang3, thang4 = @thang4,
+            thang5 = @thang5, thang6 = @thang6, thang7 = @thang7, thang8 = @thang8,
+            thang9 = @thang9, thang10 = @thang10, thang11 = @thang11, thang12 = @thang12,
+            createdBy = @createdBy,
+            createdAt = @createdAt,
+            ghiChu = @ghichu
+        WHEN NOT MATCHED THEN 
+          INSERT (
+            maNhanVien, hoTen, isphongban, ischinhanh, maPhongBan, phongBan, maChiNhanh, chiNhanh,
+            ngayHopDongTinhPhep, isNangNhocDocHai, ngayPhep, tongDaNghi, conLai,
+            thang1, thang2, thang3, thang4, thang5, thang6, thang7, thang8, thang9, thang10, thang11, thang12,
+            createdBy, createdAt, ghiChu, nam
+          ) VALUES (
+            @maNhanVien, @hoTen, @isphongban, @ischinhanh, @maPhongBan, @phongBan, @maChiNhanh, @chiNhanh,
+            @ngayHopDongTinhPhep, @isNangNhocDocHai, @ngayPhep, @tongDaNghi, @conlai,
+            @thang1, @thang2, @thang3, @thang4, @thang5, @thang6, @thang7, @thang8, @thang9, @thang10, @thang11, @thang12,
+            @createdBy, @createdAt, @ghichu, @nam
+          );
+      `);
+
+    await transaction.commit();
+    res.json({ success: true, message: "Lưu dữ liệu thành công" });
+  } catch (err) {
+    if (transaction) await transaction.rollback();
+    console.error("Lỗi khi lưu dữ liệu:", err);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lưu dữ liệu",
+      error: err.message,
     });
   } finally {
     if (pool.connected) await pool.close();

@@ -8,8 +8,9 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
-var folderAvatar = "D:\\DATA\\code\\tcdvthu_client\\static\\avatar";
-var urlServer = "192.168.1.5:81";
+// MÁY CHỦ TUANPDA (LƯU TRÊN MÁY HP508PROLIANT) MÁY ẢO WINDOWS
+var folderAvatar = "E:\\CODE_APP\\QUANLYNHANSU\\MTDTHATINH\\qlns_client\\static\\avatar";
+var urlServer = "14.224.129.177:2612";
 
 // SET STORAGE
 var storage = multer.diskStorage({
