@@ -115,8 +115,8 @@ router.post("/access/login", async (req, res, next) => {
           res.cookie("token", token, {
             httpOnly: true,
             secure: false, // nếu dùng HTTPS thì phải là true
-            // sameSite: "lax",
-            sameSite: "None",
+            sameSite: "lax",
+            // sameSite: "None",
             maxAge: 12 * 60 * 60 * 1000, // 12 tiếng
           });
 
