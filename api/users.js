@@ -12,6 +12,9 @@ const path = require("path");
 var folderAvatar = "E:\\CODE_APP\\QUANLYNHANSU\\MTDTHATINH\\qlns_client\\static\\avatar";
 var urlServer = "14.224.129.177:2612";
 
+// LOCALHOST
+// var folderAvatar = "D:\\SOFTWARE\\QLNSSOFTWARE\\qlns_client\\static\\avatar";
+
 // SET STORAGE
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -302,7 +305,7 @@ router.post("/user/changeemail", async (req, res) => {
 // });
 
 router.get("/auth/user", verifyToken, async (req, res) => {
-  console.log(req.user);
+  // console.log(req.user);
   res.json({
     user: req.user,
   });
@@ -385,163 +388,6 @@ router.post("/account", upload.single("avatar"), async (req, res) => {
   }
 });
 
-router.post("/importkehoachnam", upload.single("file"), async (req, res) => {
-  if (req.file) {
-    //console.log(req.file);
-    //console.log(req.file.path)
-    let path = req.file.path;
-
-    let rows = await readXlsxFile(path);
-    rows.shift();
-    //console.table(rows);
-    // console.log(rows);
-
-    const createdBy = req.body.createdBy;
-    const createdAt = req.body.createdAt;
-    const updatedAt = req.body.updatedAt;
-
-    const table = new Table("kehoach");
-    table.create = false;
-
-    table.columns.add("makh", NVarChar, { nullable: true });
-    table.columns.add("mathanhpham", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("tenthanhpham", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("nhomthanhpham", NVarChar, { nullable: true });
-    table.columns.add("soluong", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("soluongmuavup1", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("soluongmuavup2", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("soluongmuavup3", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("tgbatdau", Date, {
-      nullable: true,
-    });
-    table.columns.add("tgketthuc", Date, {
-      nullable: true,
-    });
-    table.columns.add("makhachhang", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("khachhang", NVarChar, { length: "max", nullable: true });
-    table.columns.add("ghichu", NVarChar, {
-      length: "max",
-      nullable: true,
-    });
-    table.columns.add("status", Int, {
-      nullable: true,
-    });
-    table.columns.add("createdAt", Date, {
-      nullable: true,
-    });
-    table.columns.add("createdBy", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("updatedAt", Date, {
-      nullable: true,
-    });
-    table.columns.add("slthang1", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang2", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang3", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang4", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang5", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang6", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang7", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang8", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang9", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang10", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang11", NVarChar, {
-      nullable: true,
-    });
-    table.columns.add("slthang12", NVarChar, {
-      nullable: true,
-    });
-
-    // rows.forEach((row) => table.rows.add.apply(table.rows, row));
-
-    // console.log(rows);
-
-    for (let j = 0; j < rows.length; j += 1) {
-      table.rows.add(
-        rows[j][0],
-        rows[j][1],
-        rows[j][2],
-        rows[j][3],
-        rows[j][4],
-        rows[j][5],
-        rows[j][6],
-        rows[j][7],
-        rows[j][8],
-        rows[j][9],
-        rows[j][10],
-        rows[j][11],
-        rows[j][12],
-        rows[j][13],
-        createdAt,
-        createdBy,
-        updatedAt,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-      );
-    }
-
-    try {
-      await pool.connect();
-      const results = await pool.request().bulk(table);
-      // console.log(`rows affected ${results.rowsAffected}`);
-    } catch (error) {
-      return res.status(500).json({
-        status: "error",
-        error,
-      });
-    }
-
-    res.status(200).json({
-      status: "succes",
-    });
-  } else {
-    console.log("File not found !");
-  }
-});
 
 // import user
 router.post("/import-uses", async (req, res) => {
