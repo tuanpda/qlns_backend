@@ -13,7 +13,7 @@ dotenv.config();
 app.use(cookieParser());
 
 const allowedOrigins = [
-  // "http://localhost:2612",
+  "http://localhost:2612",
   "http://14.224.129.177:2612",
 ];
 
