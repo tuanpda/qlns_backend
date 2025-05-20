@@ -184,6 +184,11 @@ router.post("/active/user", async (req, res) => {
   }
 });
 
+router.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.json({ message: "Logged out" });
+});
+
 /* Tạo user auth kèm token */
 // router.post("/account", upload.single("avatar"), async (req, res) => {
 //   // console.log(req.body);
