@@ -17,7 +17,7 @@ const { log } = require("console");
 
 // LOCAL
 var folderFileUpload =
-  "E:\\CODE_APP\\QUANLYNHANSU\\MTDTHATINH\\qlns_client\\static\\anhHoSo";
+  "E:\\CODE_APP\\QUANLYNHANSU\\HATINH\\qlns_client\\static\\anhHoSo";
 // var folderFileUpload =
 //   "/Users/apple/Documents/code/p_Quanlynhansu/qlns_client/static/anhHoSo/";
 // var urlServer = "localhost:2612";
