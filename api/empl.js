@@ -274,6 +274,62 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
   }
 });
 
+router.post("/add-codong", upload.none(), async (req, res) => {
+  let data = req.body;
+  // console.log(data);
+  
+  let transaction = null;
+
+  try {
+    await pool.connect();
+
+    transaction = new Transaction(pool);
+    await transaction.begin();
+
+    await transaction
+      .request()
+      .input("hoTen", data.hoTen)
+      .input("donVi", data.donVi)
+      .input("soCccd", data.soCccd)
+      .input("ngayCap", data.ngayCap)
+      .input("diaChi", data.diaChi)
+      .input("cophantudo", data.cophantudo)
+      .input("cophanhanche", data.cophanhanche)
+      .input("tong", data.tong)
+      .input("ghichu", data.ghichu)
+      .input("tenloaicp", data.tenloaicp)
+      .input("loaicp", data.loaicp)
+      .input("createdBy", data.createdBy)
+      .input("createdAt", data.createdAt)
+      .query(`
+        INSERT INTO codong (
+          hoTen, donVi, soCccd, ngayCap, diaChi,
+          cophantudo, cophanhanche, tong, ghichu,
+          tenloaicp, loaicp, createdBy, createdAt
+        ) VALUES (
+          @hoTen, @donVi, @soCccd, @ngayCap, @diaChi,
+          @cophantudo, @cophanhanche, @tong, @ghichu,
+          @tenloaicp, @loaicp, @createdBy, @createdAt
+        );
+      `);
+
+    await transaction.commit();
+
+    return res.json({ success: true, message: "Thêm cổ đông thành công." });
+  } catch (err) {
+    if (transaction) await transaction.rollback();
+    console.error("Lỗi thêm cổ đông:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi khi thêm cổ đông.",
+      error: err.message,
+    });
+  } finally {
+    if (pool.connected) await pool.close();
+  }
+});
+
+
 router.post("/add-ngaynghiphep", async (req, res) => { 
   const dataNhansu = req.body;
   // console.log(dataNhansu);
@@ -436,6 +492,7 @@ router.post("/update-empl", upload.single("anhHoSo"), async (req, res) => {
         .input("status", dataNhansu.status)
         .input("ischinhanh", dataNhansu.ischinhanh)
         .input("isphongban", dataNhansu.isphongban)
+        .input("isDangVien", dataNhansu.isDangVien)
         .input("maPhongBan", dataNhansu.maPhongBan)
         .input("maChiNhanh", dataNhansu.maChiNhanh)
         .input("phongBan", dataNhansu.phongBan)
@@ -444,11 +501,12 @@ router.post("/update-empl", upload.single("anhHoSo"), async (req, res) => {
         .input("soCccd", dataNhansu.soCccd).query(`
           UPDATE nhansu SET
             hoTen = @hoTen, soDienThoai = @soDienThoai, ngaySinh = @ngaySinh, gioiTinh = @gioiTinh, viTriCongTac = @viTriCongTac,
-            thoiGianBatdauTgBhxh = @thoiGianBatdauTgBhxh, loaiHd = @loaiHd, thoiHanHd_Batdau = @thoiHanHd_Batdau, thoiHanHd_Ketthuc = @thoiHanHd_Ketthuc, ngayBonhiemChucvu = @ngayBonhiemChucvu,
-            trinhDoHocVan = @trinhDoHocVan, trinhDoChuyenMon = @trinhDoChuyenMon, danToc = @danToc, tonGiao = @tonGiao, soCmnd = @soCmnd,
+            thoiGianBatdauTgBhxh = @thoiGianBatdauTgBhxh, loaiHd = @loaiHd, thoiHanHd_Batdau = @thoiHanHd_Batdau, thoiHanHd_Ketthuc = @thoiHanHd_Ketthuc, 
+            ngayBonhiemChucvu = @ngayBonhiemChucvu, trinhDoHocVan = @trinhDoHocVan, trinhDoChuyenMon = @trinhDoChuyenMon, danToc = @danToc, 
+            tonGiao = @tonGiao, soCmnd = @soCmnd,
             ngayCap_cmnd = @ngayCap_cmnd, noiCap_cmnd = @noiCap_cmnd, ngayCap_Cccd = @ngayCap_Cccd, noiCap_Cccd = @noiCap_Cccd,
             noiKhaiSinh = @noiKhaiSinh, diaChiHoKhau = @diaChiHoKhau, diaChiHienNay = @diaChiHienNay,
-            ghichu = @ghichu, status = @status, ischinhanh = @ischinhanh, isphongban = @isphongban,
+            ghichu = @ghichu, status = @status, ischinhanh = @ischinhanh, isphongban = @isphongban, isDangVien = @isDangVien,
             maPhongBan = @maPhongBan, maChiNhanh = @maChiNhanh, phongBan = @phongBan, chiNhanh = @chiNhanh, anhHoSo = @anhHoSo
           WHERE _id = @_id;
         `);
@@ -777,7 +835,7 @@ router.get("/report-chart-age", async (req, res) => {
 
 // cập nhật sang nghỉ việc
 router.post("/update-nghi-viec", async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
 
   let dataNhansu = req.body;
   let transaction = null;
@@ -795,6 +853,49 @@ router.post("/update-nghi-viec", async (req, res) => {
         .input("lyDoNghiViec", dataNhansu.lyDoNghiViec).query(`
           UPDATE nhansu SET
             lyDoNghiViec=@lyDoNghiViec, isNghiHuu=1, thoiDiemNghi = @thoiDiemNghi
+          WHERE _id = @_id;
+        `);
+
+      await transaction.commit();
+      res.json({ success: true, message: "Cập nhật thành công" });
+    } catch (err) {
+      if (transaction) await transaction.rollback();
+      console.error("Lỗi khi cập nhật:", err);
+      res.status(500).json({
+        success: false,
+        message: "Lỗi khi cập nhật",
+        error: err.message,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Lỗi kết nối cơ sở dữ liệu",
+      error: error.message,
+    });
+  } finally {
+    if (pool.connected) await pool.close();
+  }
+});
+
+// chuyển lên chính thức
+router.post("/chuyen-chinh-thuc", async (req, res) => {
+  // console.log(req.body);
+
+  let dataNhansu = req.body;
+  let transaction = null;
+
+  try {
+    await pool.connect();
+    try {
+      transaction = new Transaction(pool);
+      await transaction.begin();
+
+      await transaction
+        .request()
+        .input("_id", dataNhansu._id).query(`
+          UPDATE nhansu SET
+            isThoiVu=0
           WHERE _id = @_id;
         `);
 
@@ -851,6 +952,34 @@ router.post("/delete/nhansu", async (req, res) => {
         .request()
         .input("_id", req.body.id)
         .query(`DELETE FROM nhansu WHERE _id = @_id;`);
+      res.json({ success: true });
+    } else {
+      res.status(404).json({
+        message: "Record not found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+// xóa cổ đông
+router.post("/delete/codong", async (req, res) => {
+  // console.log(req.body.id);
+  try {
+    await pool.connect();
+    const result = await pool
+      .request()
+      .input("_id", req.body.id)
+      .query(`SELECT * FROM codong WHERE _id = @_id`);
+
+    let nhansu = result.recordset.length ? result.recordset[0] : null;
+    // console.log(nhansu);
+    if (nhansu) {
+      await pool
+        .request()
+        .input("_id", req.body.id)
+        .query(`DELETE FROM codong WHERE _id = @_id;`);
       res.json({ success: true });
     } else {
       res.status(404).json({
