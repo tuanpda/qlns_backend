@@ -498,7 +498,13 @@ router.post("/update-empl", upload.single("anhHoSo"), async (req, res) => {
         .input("phongBan", dataNhansu.phongBan)
         .input("chiNhanh", dataNhansu.chiNhanh)
         .input("anhHoSo", linkAnhHoSo)
-        .input("soCccd", dataNhansu.soCccd).query(`
+        .input("soCccd", dataNhansu.soCccd)
+        .input("tenChiBo", dataNhansu.tenChiBo)
+        .input("chucVuDangDoanThe", dataNhansu.chucVuDangDoanThe)
+        .input("ngayVaoDang", dataNhansu.ngayVaoDang)
+        .input("ngayVaoDangChinhThuc", dataNhansu.ngayVaoDangChinhThuc)
+        .input("huyHieuDang", dataNhansu.huyHieuDang)
+        .input("isDuBi", dataNhansu.isDuBi).query(`
           UPDATE nhansu SET
             hoTen = @hoTen, soDienThoai = @soDienThoai, ngaySinh = @ngaySinh, gioiTinh = @gioiTinh, viTriCongTac = @viTriCongTac,
             thoiGianBatdauTgBhxh = @thoiGianBatdauTgBhxh, loaiHd = @loaiHd, thoiHanHd_Batdau = @thoiHanHd_Batdau, thoiHanHd_Ketthuc = @thoiHanHd_Ketthuc, 
@@ -507,7 +513,9 @@ router.post("/update-empl", upload.single("anhHoSo"), async (req, res) => {
             ngayCap_cmnd = @ngayCap_cmnd, noiCap_cmnd = @noiCap_cmnd, ngayCap_Cccd = @ngayCap_Cccd, noiCap_Cccd = @noiCap_Cccd,
             noiKhaiSinh = @noiKhaiSinh, diaChiHoKhau = @diaChiHoKhau, diaChiHienNay = @diaChiHienNay,
             ghichu = @ghichu, status = @status, ischinhanh = @ischinhanh, isphongban = @isphongban, isDangVien = @isDangVien,
-            maPhongBan = @maPhongBan, maChiNhanh = @maChiNhanh, phongBan = @phongBan, chiNhanh = @chiNhanh, anhHoSo = @anhHoSo
+            maPhongBan = @maPhongBan, maChiNhanh = @maChiNhanh, phongBan = @phongBan, chiNhanh = @chiNhanh, anhHoSo = @anhHoSo,
+            tenChiBo = @tenChiBo, chucVuDangDoanThe=@chucVuDangDoanThe, ngayVaoDang=@ngayVaoDang, ngayVaoDangChinhThuc=@ngayVaoDangChinhThuc,
+            huyHieuDang=@huyHieuDang
           WHERE _id = @_id;
         `);
 
