@@ -230,6 +230,7 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
         .input("phongBan", dataNhansu.phongBan)
         .input("chiNhanh", dataNhansu.chiNhanh)
         .input("isThoiVu", dataNhansu.isThoiVu)
+        .input("isNghiHuu", dataNhansu.isNghiHuu)
         .input("isNangNhocDocHai", dataNhansu.isNangNhocDocHai)
         .input("ngayHopDongTinhPhep", dataNhansu.ngayHopDongTinhPhep)
         .input("anhHoSo", linkAnhHoSo).query(`
@@ -239,7 +240,7 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
             trinhDoHocVan, trinhDoChuyenMon, danToc, tonGiao, soCmnd, 
             ngayCap_cmnd, noiCap_cmnd, soCccd, ngayCap_Cccd, noiCap_Cccd, 
             noiKhaiSinh, diaChiHoKhau, diaChiHienNay, createdBy, createdAt, 
-            ghichu, maNhanVien, status, ischinhanh, isphongban, isThoiVu, isNangNhocDocHai, ngayHopDongTinhPhep,
+            ghichu, maNhanVien, status, ischinhanh, isphongban, isThoiVu, isNghiHuu, isNangNhocDocHai, ngayHopDongTinhPhep,
             maPhongBan, maChiNhanh, phongBan, chiNhanh, anhHoSo
           ) VALUES (
             @hoTen, @soDienThoai, @ngaySinh, @gioiTinh, @viTriCongTac, 
@@ -247,7 +248,7 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
             @trinhDoHocVan, @trinhDoChuyenMon, @danToc, @tonGiao, @soCmnd, 
             @ngayCap_cmnd, @noiCap_cmnd, @soCccd, @ngayCap_Cccd, @noiCap_Cccd, 
             @noiKhaiSinh, @diaChiHoKhau, @diaChiHienNay, @createdBy, @createdAt, 
-            @ghichu, @maNhanVien, @status, @ischinhanh, @isphongban, @isThoiVu, @isNangNhocDocHai, @ngayHopDongTinhPhep,
+            @ghichu, @maNhanVien, @status, @ischinhanh, @isphongban, @isThoiVu, @isNghiHuu, @isNangNhocDocHai, @ngayHopDongTinhPhep,
             @maPhongBan, @maChiNhanh, @phongBan, @chiNhanh, @anhHoSo
           );
         `);
