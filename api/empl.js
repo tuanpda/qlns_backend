@@ -230,7 +230,7 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
         .input("phongBan", dataNhansu.phongBan)
         .input("chiNhanh", dataNhansu.chiNhanh)
         .input("isThoiVu", dataNhansu.isThoiVu)
-        .input("isNghiHuu", dataNhansu.isNghiHuu)
+        .input("isNghiHuu", 1)
         .input("isNangNhocDocHai", dataNhansu.isNangNhocDocHai)
         .input("ngayHopDongTinhPhep", dataNhansu.ngayHopDongTinhPhep)
         .input("anhHoSo", linkAnhHoSo).query(`
