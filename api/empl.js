@@ -167,7 +167,7 @@ router.post("/add-empl", upload.single("anhHoSo"), async (req, res) => {
   if (file) {
     linkAnhHoSo = `http://${urlServer}/anhHoSo/${req.file.filename}`;
   } else {
-    linkAnhHoSo = "";
+    linkAnhHoSo = `http://${urlServer}/anhHoSo/default-image.jpg`;
   }
 
   try {
@@ -905,6 +905,49 @@ router.post("/chuyen-chinh-thuc", async (req, res) => {
         .input("_id", dataNhansu._id).query(`
           UPDATE nhansu SET
             isThoiVu=0
+          WHERE _id = @_id;
+        `);
+
+      await transaction.commit();
+      res.json({ success: true, message: "Cập nhật thành công" });
+    } catch (err) {
+      if (transaction) await transaction.rollback();
+      console.error("Lỗi khi cập nhật:", err);
+      res.status(500).json({
+        success: false,
+        message: "Lỗi khi cập nhật",
+        error: err.message,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Lỗi kết nối cơ sở dữ liệu",
+      error: error.message,
+    });
+  } finally {
+    if (pool.connected) await pool.close();
+  }
+});
+
+// chuyển sang thời vụ
+router.post("/chuyen-thoi-vu", async (req, res) => {
+  // console.log(req.body);
+
+  let dataNhansu = req.body;
+  let transaction = null;
+
+  try {
+    await pool.connect();
+    try {
+      transaction = new Transaction(pool);
+      await transaction.begin();
+
+      await transaction
+        .request()
+        .input("_id", dataNhansu._id).query(`
+          UPDATE nhansu SET
+            isThoiVu=1
           WHERE _id = @_id;
         `);
 
